@@ -3,7 +3,8 @@ export default class extends React.Component {
         return <div>
             <h1>Hola Mundo</h1>
             <p>Bienenidos al Curso de Next.js</p>
-            <p>Enviar</p>
+            <img src="/static/platzi-logo.png" alt="Platzi"/>
+            
             <style jsx>{`
             h1 {
                 color: red;
@@ -11,11 +12,16 @@ export default class extends React.Component {
             :global(div p) {
                 color: green;
             }
+            img {
+                max-width: 50%;
+                display: block;
+                margin: 0 auto;
+            }
             `}</style>
 
             <style jsx global>{`
             body {
-                background: yellow;
+                background: white;
             }
             `}</style>
 
