@@ -3,6 +3,22 @@ export default class extends React.Component {
         return <div>
             <h1>Hola Mundo</h1>
             <p>Bienenidos al Curso de Next.js</p>
+            <p>Enviar</p>
+            <style jsx>{`
+            h1 {
+                color: red;
+            }
+            div :global(p) {
+                color: green;
+            }
+            `}</style>
+
+            <style jsx global>{`
+            body {
+                background: yellow;
+            }
+            `}</style>
+
         </div>
     }
 }
