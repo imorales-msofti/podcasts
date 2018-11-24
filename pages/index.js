@@ -8,7 +8,7 @@ export default class extends React.Component {
             h1 {
                 color: red;
             }
-            div :global(p) {
+            :global(div p) {
                 color: green;
             }
             `}</style>
