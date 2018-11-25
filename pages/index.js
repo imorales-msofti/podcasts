@@ -1,4 +1,5 @@
 import fetch from 'isomorphic-fetch'
+import Link from 'next/link'
 
 export default class extends React.Component {
 
@@ -27,10 +28,12 @@ export default class extends React.Component {
             <div className="channels">
             {
                 channels.map((channel) => (
+                    <Link href="/channel" prefetch>
                     <a className="channel">
                     <img src={ channel.urls.logo_image.original } alt="" />
                     <h2>{ channel.title }</h2>
                     </a>
+                    </Link>
                 ))
             }
             </div>
@@ -54,6 +57,7 @@ export default class extends React.Component {
                 margin-bottom: 0.5em;
                 color: #333;
                 text-decoration: none;
+                text-align: center;
             }
             .channel img {
                 width: 100%;
