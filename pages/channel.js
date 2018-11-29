@@ -29,6 +29,7 @@ export default class extends React.Component {
         2.- FORMA DE HACERLO
         */
        
+        /* Una mejor forma de solicitar un fectch, respondiendo más rápido a la petición*/
         let [reqChannel, reqSeries, reqAudios] = await Promise.all([
             fetch(`https://api.audioboom.com/channels/${idChannel}`),
             fetch(`https://api.audioboom.com/channels/${idChannel}/child_channels`),
@@ -54,6 +55,17 @@ export default class extends React.Component {
             <header>Podcasts</header>
             <div className="banner" style={{ backgroundImage: `url(${channel.urls.banner_image.original})` }} />
             <h1>{ channel.title }</h1>
+
+           
+            <h2>Últimas Series</h2>
+             { series.map((serie)=>(
+                <div>{ serie.title }</div>
+            ))}
+            
+            <h2>Audio Clips</h2>
+             { audioClips.map((clip)=>(
+                <div>{ clip.title }</div>
+            ))}
 
             <style jsx>{`
             header {
