@@ -1,5 +1,6 @@
 import fetch from 'isomorphic-fetch'
 import Link from 'next/link'
+import Layout from '../components/layout'
 
 export default class extends React.Component {
 
@@ -22,9 +23,9 @@ export default class extends React.Component {
     render(){
         const { channels } = this.props
 
-        return <div>
-            <header>Podcasts</header>
-
+        
+        return <Layout>
+    
             <div className="channels">
             {
                 channels.map((channel) => (
@@ -39,12 +40,7 @@ export default class extends React.Component {
             </div>
             
             <style jsx>{`
-            header {
-                color: #fff;
-                background: #8756ca;
-                padding: 15px;
-                text-align: center;
-            }
+           
             .channels {
                 display: grid;
                 grid-gap: 15px;
@@ -75,14 +71,7 @@ export default class extends React.Component {
            
             `}</style>
 
-            <style jsx global>{`
-            body {
-                margin: 0;
-                font-family: system-ui
-                background: white;
-            }
-            `}</style>
 
-        </div>
+        </Layout>
     }
 }
