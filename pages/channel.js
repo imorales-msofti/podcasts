@@ -8,7 +8,7 @@ export default class extends React.Component {
     static async getInitialProps({ query }) {
         let idChannel = query.id
         console.log(idChannel)
-        
+
         /*
         1.- FORMA DE HACERLO
         let reqChannel = await fetch(`https://api.audioboom.com/channels/${idChannel}`)
@@ -28,7 +28,7 @@ export default class extends React.Component {
         /*
         2.- FORMA DE HACERLO
         */
-       
+
         /* Una mejor forma de solicitar un fectch, respondiendo más rápido a la petición*/
         let [reqChannel, reqSeries, reqAudios] = await Promise.all([
             fetch(`https://api.audioboom.com/channels/${idChannel}`),
@@ -45,8 +45,8 @@ export default class extends React.Component {
         let dataSeries = await reqSeries.json()
         let series = dataSeries.body.channels
 
-        return { channel, audioClips, series}
-       
+        return { channel, audioClips, series }
+
     }
 
     render() {
@@ -54,17 +54,17 @@ export default class extends React.Component {
         return <div>
             <header>Podcasts</header>
             <div className="banner" style={{ backgroundImage: `url(${channel.urls.banner_image.original})` }} />
-            <h1>{ channel.title }</h1>
+            <h1>{channel.title}</h1>
 
-           
+
             <h2>Últimas Series</h2>
-             { series.map((serie)=>(
-                <div>{ serie.title }</div>
+            {series.map((serie) => (
+                <div>{serie.title}</div>
             ))}
-            
+
             <h2>Audio Clips</h2>
-             { audioClips.map((clip)=>(
-                <div>{ clip.title }</div>
+            {audioClips.map((clip) => (
+                <div>{clip.title}</div>
             ))}
 
             <style jsx>{`
