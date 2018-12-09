@@ -1,123 +1,114 @@
+import 'isomorphic-fetch'
+import Layout from '../components/Layout'
+import ChannelGrid from '../components/ChannelGrid'
+import PodcastList from '../components/PodcastList'
+import PodcastListWithClick from '../components/PodcastListWithClick'
+import PodcastPlayer from '../components/PodcastPlayer'
+import Error from './_error'
+
 export default class extends React.Component {
 
-    /* 
-        getInitialProps({ query }), para obtener el id del channel que buscaremos en el API.
+  constructor(props) {
+    super(props)
+    this.state = { openPodcast: null }
+  }
 
-    */
+  static async getInitialProps({ query, res }) {
+    let idChannel = query.id
 
-    static async getInitialProps({ query }) {
-        let idChannel = query.id
-        console.log(idChannel)
+    try {
+      let [reqChannel, reqSeries, reqAudios] = await Promise.all([
+        fetch(`https://api.audioboom.com/channels/${idChannel}`),
+        fetch(`https://api.audioboom.com/channels/${idChannel}/child_channels`),
+        fetch(`https://api.audioboom.com/channels/${idChannel}/audio_clips`)
+      ])
 
-        /*
-        1.- FORMA DE HACERLO
-        let reqChannel = await fetch(`https://api.audioboom.com/channels/${idChannel}`)
-        let dataChannel = await reqChannel.json()
-        let channel = dataChannel.body.channel
+      if( reqChannel.status >= 400 ) {
+        res.statusCode = reqChannel.status
+        return { channel: null, audioClips: null, series: null, statusCode: reqChannel.status }
+      }
 
-        let reqAudios = await fetch(`https://api.audioboom.com/channels/${idChannel}/audio_clips`)
-        let dataAudios = await reqAudios.json()
-        let audioClips = dataAudios.body.audio_clips
+      let dataChannel = await reqChannel.json()
+      let channel = dataChannel.body.channel
 
-        console.log(channel)
-        console.log(audioClips)
+      let dataAudios = await reqAudios.json()
+      let audioClips = dataAudios.body.audio_clips
 
-        return { channel, audioClips }
-        */
+      let dataSeries = await reqSeries.json()
+      let series = dataSeries.body.channels
 
-        /*
-        2.- FORMA DE HACERLO
-        */
+      return { channel, audioClips, series, statusCode: 200 }
+    } catch(e) {
+      return { channel: null, audioClips: null, series: null, statusCode: 503 }
+    }
+  }
 
-        /* Una mejor forma de solicitar un fectch, respondiendo más rápido a la petición*/
-        let [reqChannel, reqSeries, reqAudios] = await Promise.all([
-            fetch(`https://api.audioboom.com/channels/${idChannel}`),
-            fetch(`https://api.audioboom.com/channels/${idChannel}/child_channels`),
-            fetch(`https://api.audioboom.com/channels/${idChannel}/audio_clips`),
-        ])
-
-        let dataChannel = await reqChannel.json()
-        let channel = dataChannel.body.channel
-
-        let dataAudios = await reqAudios.json()
-        let audioClips = dataAudios.body.audio_clips
-
-        let dataSeries = await reqSeries.json()
-        let series = dataSeries.body.channels
-
-        return { channel, audioClips, series }
-
+  openPodcast = (event, podcast) => {
+    if ( event.metaKey || event.ctrlKey || event.shiftKey || (event.nativeEvent && event.nativeEvent.which === 2) ) {
+      // Si está haciendo Ctrl+Click o Cmd+Click, dejamos que el click suceda normalmente
+      return
     }
 
-    render() {
-        const { channel, audioClips, series } = this.props
-        return <div>
-            <header>Podcasts</header>
-            <div className="banner" style={{ backgroundImage: `url(${channel.urls.banner_image.original})` }} />
-            <h1>{channel.title}</h1>
+    event.preventDefault()
+    this.setState({
+      openPodcast: podcast
+    })
+  }
 
+  closePodcast = (event) => {
+    event.preventDefault()
+    this.setState({
+      openPodcast: null
+    })
+  }
+  
+  render() {
+    const { channel, audioClips, series, statusCode } = this.props
+    const { openPodcast } = this.state
 
-            <h2>Últimas Series</h2>
-            {series.map((serie) => (
-                <div>{serie.title}</div>
-            ))}
+    if( statusCode !== 200 ) {
+      return <Error statusCode={ statusCode } />
+    }
 
-            <h2>Audio Clips</h2>
-            {audioClips.map((clip) => (
-                <div>{clip.title}</div>
-            ))}
+    return <Layout title={channel.title}>
 
-            <style jsx>{`
-            header {
-                color: #fff;
-                background: #8756ca;
-                padding: 15px;
-                text-align: center;
-            }
-            .banner {
-                width: 100%;
-                padding-bottom: 25%;
-                background-position: 50% 50%;
-                background-size: cover;
-                background-color: #aaa;
-            }
-            .channels {
-                display: grid;
-                grid-gap: 15px;
-                padding: 15px;
-                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-            }
-            .channel {
-                display: block;
-                border-radius: 3px;
-                margin-bottom: 0.5em;
-                color: #333;
-                text-decoration: none;
-                text-align: center;
-            }
-            .channel img {
-                width: 100%;
-                border-radius: 3px;
-                box-shadow: 0px 2px 6px rgba(0,0,0,0,.15);
-                width: 100px;
-            }
-            h1 {
-                padding: 15px;
-                font-size: 0.9em;
-                font-weight: 600;
-                maring: 0;
-                text-align: center;
-            }
-           
-            `}</style>
+      { openPodcast && 
+        <PodcastPlayer clip={ openPodcast } onClose={ this.closePodcast } />
+      }
 
-            <style jsx global>{`
-            body {
-                margin: 0;
-                font-family: system-ui
-                background: white;
-            }
-            `}</style>
+      <div className="banner" style={{ backgroundImage: `url(${channel.urls.banner_image.original})` }} />
+      
+      <h1>{ channel.title }</h1>
+
+      { series.length > 0 &&
+        <div>
+          <h2>Series</h2>
+          <ChannelGrid channels={ series } />
         </div>
-    }
+      }
+
+      <h2>Ultimos Podcasts</h2>
+      <PodcastListWithClick podcasts={ audioClips } onClickPodcast={ this.openPodcast } />
+
+      <style jsx>{`
+        .banner {
+          width: 100%;
+          padding-bottom: 25%;
+          background-position: 50% 50%;
+          background-size: cover;
+          background-color: #aaa;
+        }
+        h1 {
+          font-weight: 600;
+          padding: 15px;
+        }
+        h2 {
+          padding: 15px;
+          font-size: 1.2em;
+          font-weight: 600;
+          margin: 0;
+        }
+      `}</style>
+    </Layout>
+  }
 }
